@@ -1,0 +1,12 @@
+
+#chart .apexcharts-tooltip {
+  color: #000;
+  overflow: visible !important;
+  white-space: normal !important;
+  font-family: "Sarabun-Medium";
+}
+
+#chart .apexcharts-tooltip span {
+  padding: 5px 10px;
+  display: inline-block;
+}

@@ -1,0 +1,87 @@
+:root {
+  font-size: 16px;
+  line-height: 24px;
+  text-transform: none;
+
+  color: #212b36;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+
+@font-face {
+  font-family: "Sarabun-Light";
+  src: url("./assets/fonts/Sarabun-Light.ttf");
+}
+
+@font-face {
+  font-family: "Sarabun-Regular";
+  src: url("./assets/fonts/Sarabun-Regular.ttf");
+}
+
+@font-face {
+  font-family: "Sarabun-Medium";
+  src: url("./assets/fonts/Sarabun-Medium.ttf");
+}
+
+@font-face {
+  font-family: "Sarabun-SemiBold";
+  src: url("./assets/fonts/Sarabun-SemiBold.ttf");
+}
+
+@font-face {
+  font-family: "Sarabun-Bold";
+  src: url("./assets/fonts/Sarabun-Bold.ttf");
+}
+
+@font-face {
+  font-family: "Sarabun-ExtraLight";
+  src: url("./assets/fonts/Sarabun-ExtraLight.ttf");
+}
+
+@font-face {
+  font-family: "Sarabun-ExtraBold";
+  src: url("./assets/fonts/Sarabun-ExtraBold.ttf");
+}
+
+@font-face {
+  font-family: "PublicSans-Light";
+  src: url("./assets/fonts/PublicSans-Light.ttf");
+}
+
+@font-face {
+  font-family: "PublicSans-Regular";
+  src: url("./assets/fonts/PublicSans-Regular.ttf");
+}
+
+@font-face {
+  font-family: "PublicSans-Medium";
+  src: url("./assets/fonts/PublicSans-Medium.ttf");
+}
+
+@font-face {
+  font-family: "PublicSans-SemiBold";
+  src: url("./assets/fonts/PublicSans-SemiBold.ttf");
+}
+
+@font-face {
+  font-family: "PublicSans-Bold";
+  src: url("./assets/fonts/PublicSans-Bold.ttf");
+}
+
+@font-face {
+  font-family: "PublicSans-ExtraLight";
+  src: url("./assets/fonts/PublicSans-ExtraLight.ttf");
+}
+
+@font-face {
+  font-family: "PublicSans-ExtraBold";
+  src: url("./assets/fonts/PublicSans-ExtraBold.ttf");
+}
+
+
+
+
