@@ -1,0 +1,442 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator dbml {
+  provider            = "prisma-dbml-generator"
+  output              = "../prisma/generated/dbml"
+  outputName          = "schemaqueuetix.dbml"
+  projectName         = "Queuetix"
+  projectDatabaseType = "MySQL"
+}
+
+generator typegraphql {
+  provider            = "typegraphql-prisma"
+  output              = "../prisma/generated/type-graphql"
+  formatGeneratedCode = "prettier"
+}
+
+generator erd {
+  provider = "prisma-erd-generator"
+  output   = "../ERD.svg"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================== Role Others ===============================
+model Employee {
+  id                   String                 @id @default(uuid()) @map("_id") @db.VarChar(36)
+  ridesId              String?                @map("id_rides") @db.VarChar(36)
+  amusementparkId      String                 @map("id_amusementpark") @db.VarChar(36)
+  email                String?                @unique
+  password             String?
+  fullname             String?                @db.VarChar(255)
+  firstname            String?
+  lastname             String?
+  gender               Gender?
+  role                 String?                @default("Employee")
+  types                TypesRoleEmployee?
+  phone                String?                @db.VarChar(10)
+  profilePicture       String                 @default("https://queuetix.s3.ap-southeast-2.amazonaws.com/people.png")
+  createdAt            DateTime               @default(now()) @map("created_at")
+  datetimecheckinrides DateTimeCheckInRides[]
+  amusementpark        AmusementPark          @relation(fields: [amusementparkId], references: [id])
+  rides                Rides?                 @relation(fields: [ridesId], references: [id])
+
+  @@map("employee")
+}
+
+model Manager {
+  id              String        @id @default(uuid()) @map("_id") @db.VarChar(36)
+  adminId         String        @map("id_admin") @db.VarChar(36)
+  amusementparkId String        @map("id_amusementpark") @db.VarChar(36)
+  email           String?       @unique
+  password        String?
+  fullname        String?       @db.VarChar(255)
+  firstname       String?
+  lastname        String?
+  role            String?       @default("Manager")
+  createdAt       DateTime      @default(now()) @map("created_at")
+  admin           Admin         @relation(fields: [adminId], references: [id])
+  amusementpark   AmusementPark @relation(fields: [amusementparkId], references: [id])
+
+  @@map("manager")
+}
+
+model Admin {
+  id        String    @id @default(uuid()) @map("_id") @db.VarChar(36)
+  email     String?   @unique
+  password  String?
+  fullname  String?   @db.VarChar(255)
+  firstname String?
+  lastname  String?
+  role      String?   @default("Admin")
+  createdAt DateTime  @default(now()) @map("created_at")
+  manager   Manager[]
+
+  @@map("admin")
+}
+
+// =============================== Role User & Profile ===============================
+model User {
+  id                     String                   @id @default(uuid()) @map("_id") @db.VarChar(36)
+  email                  String                   @unique
+  role                   String?                  @default("User")
+  createdAt              DateTime                 @default(now()) @map("created_at")
+  updatedAt              DateTime                 @updatedAt @map("updated_at")
+  profile                Profile?
+  purchaseticket         PurchaseTicket[]
+  purchaseticketfastpass PurchaseTicketFastpass[]
+  notification           Notification[]
+
+  @@map("user")
+}
+
+model Profile {
+  id             String    @id @default(uuid()) @map("_id") @db.VarChar(36)
+  userId         String    @unique @map("id_user") @db.VarChar(36)
+  fullname       String?   @db.VarChar(255)
+  firstname      String?
+  lastname       String?
+  gender         Gender?
+  dateOfBirth    DateTime? @map("birthday")
+  phone          String?   @db.VarChar(10)
+  profilePicture String?   @default("https://queuetix.s3.ap-southeast-2.amazonaws.com/people.png") @map("picture_url") @db.VarChar(512)
+  user           User      @relation(fields: [userId], references: [id]) // One-to-One RealationShip
+
+  @@map("userprofile")
+}
+
+// =============================== Ticket Normal ===============================
+
+model Ticket {
+  id              String           @id @default(uuid()) @map("_id") @db.VarChar(36)
+  amusementparkId String           @map("id_amusementpark") @db.VarChar(36)
+  title           String?          @db.VarChar(200)
+  description     String?          @db.VarChar(512)
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime         @updatedAt @map("updated_at")
+  typesticket     TypesTicket?
+  promotion       Promotion?
+  ridesofTicket   RidesofTicket[]
+  purchaseticket  PurchaseTicket[]
+  amusementpark   AmusementPark    @relation(fields: [amusementparkId], references: [id])
+
+  @@map("ticket")
+}
+
+model TypesTicket {
+  id           String         @id @default(uuid()) @map("_id") @db.VarChar(36)
+  ticketId     String         @unique @map("id_ticket") @db.VarChar(36)
+  types        TypesOfTicket?
+  priceofchild Int            @default(0) @db.UnsignedSmallInt
+  priceofadult Int            @default(0) @db.UnsignedSmallInt
+  ticket       Ticket         @relation(fields: [ticketId], references: [id]) // One-to-One RealationShip
+
+  @@map("typesticket")
+}
+
+// =============================== History Purchase Ticket ===============================
+// [ table 1 กาารซื้อ สามารถมีตั๋ว ธรรมดา ได้หลายตั๋ว  ]
+model PurchaseTicket {
+  id                  String                @id @default(uuid()) @map("_id") @db.VarChar(36)
+  orderId             String                @map("id_order") @db.VarChar(15)
+  userId              String                @map("id_user") @db.VarChar(36)
+  ticketId            String                @map("id_ticket") @db.VarChar(36)
+  amusementParkId     String                @map("id_amusementpark") @db.VarChar(36)
+  types               TypesOfTicket
+  dateofuse           DateTime?             @map("date_of_use") @db.Date
+  hasPromotion        Int                   @default(0) @map("has_promotion") @db.UnsignedTinyInt // (0) is False & (1) is True 
+  status              PurchaseTicketStatus  @default(Pending)
+  createdAt           DateTime              @default(now()) @map("created_at")
+  updatedAt           DateTime              @updatedAt @map("updated_at")
+  purchasetickettypes PurchaseTicketTypes[]
+  user                User                  @relation(fields: [userId], references: [id])
+  ticket              Ticket                @relation(fields: [ticketId], references: [id])
+  amusementpark       AmusementPark         @relation(fields: [amusementParkId], references: [id])
+
+  @@map("purchaseticket")
+}
+
+model PurchaseTicketTypes {
+  id                      String                    @id @default(uuid()) @map("_id") @db.VarChar(36)
+  purchaseTicketId        String                    @map("id_purchaseticket") @db.VarChar(36)
+  types                   TypesOfPurchaseTicket
+  amount                  Int                       @default(0) @db.UnsignedSmallInt
+  price                   Int                       @default(0) @db.UnsignedSmallInt
+  statusTicket            Int                       @default(0) @map("status_ticket") @db.UnsignedTinyInt // 0 ยังไม่ได้ใช้ 1 ใช้แล้ว 2 ไม่ได้ใช้แล้วหมดอายุ
+  updatedAt               DateTime                  @updatedAt @map("updated_at")
+  ticketforentrance       TicketForEntrance[]
+  purchaseticketofrides   PurchaseTicketOfRides[]
+  purchasefastpassofrides PurchaseFastpassOfRides[]
+  purchaseticket          PurchaseTicket?           @relation(fields: [purchaseTicketId], references: [id])
+
+  @@map("purchasetickettypes")
+}
+
+// [ table จอง 1 ครั้ง สามารถมีตั๋ว fastpass ได้ 1 ตั๋ว  ]
+model PurchaseTicketFastpass {
+  id                      String                    @id @default(uuid()) @map("_id") @db.VarChar(36)
+  orderId                 String                    @map("id_order") @db.VarChar(15)
+  userId                  String                    @map("id_user") @db.VarChar(36)
+  amusementParkId         String                    @map("id_amusementpark") @db.VarChar(36)
+  startDateTime           DateTime?                 @map("start_datetime")
+  endDateTime             DateTime?                 @map("end_datetime")
+  isUsed                  Int                       @default(0) @db.UnsignedTinyInt // (0) is False & (1) is True
+  createdAt               DateTime                  @default(now()) @map("created_at")
+  updatedAt               DateTime                  @updatedAt @map("updated_at")
+  purchasefastpassofrides PurchaseFastpassOfRides[]
+  user                    User                      @relation(fields: [userId], references: [id])
+  amusementpark           AmusementPark             @relation(fields: [amusementParkId], references: [id])
+
+  @@map("purchaseticketfastpass")
+}
+
+// =============================== Promotion Ticket ===============================
+
+model Promotion {
+  id              String        @id @default(uuid()) @map("_id") @db.VarChar(36)
+  ticketId        String        @unique @map("id_ticket") @db.VarChar(36)
+  amusementparkId String        @map("id_amusementpark") @db.VarChar(36)
+  title           String?       @db.VarChar(255)
+  description     String?       @db.VarChar(1024)
+  discountchild   Int?          @default(0) @db.UnsignedTinyInt
+  discountadult   Int?          @default(0) @db.UnsignedTinyInt
+  isExpired       Int           @default(0) @db.UnsignedTinyInt // (0) is False & (1) is True
+  startDate       DateTime?     @map("start_date") @db.Date
+  endDate         DateTime?     @map("end_date") @db.Date
+  picture         String?       @map("picture_url") @db.VarChar(512)
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+  ticket          Ticket        @relation(fields: [ticketId], references: [id])
+  amusementpark   AmusementPark @relation(fields: [amusementparkId], references: [id])
+
+  @@map("promotion")
+}
+
+// =============================== AmusementPark ===============================
+model AmusementPark {
+  id                     String                   @id @default(uuid()) @map("_id") @db.VarChar(36)
+  name                   String?                  @db.VarChar(255)
+  description            String?                  @db.VarChar(1024)
+  email                  String?                  @map("email_contact") @db.VarChar(200)
+  phone                  String?                  @map("phone_contact") @db.VarChar(9)
+  picture                String?                  @map("picture_url") @db.VarChar(512)
+  openinghours           String?                  @map("opening_hours") @db.VarChar(6)
+  closinghours           String?                  @map("closing_hours") @db.VarChar(6)
+  status                 AmusementParkStatus      @default(Inactive)
+  createdAt              DateTime                 @default(now()) @map("created_at")
+  updatedAt              DateTime                 @updatedAt @map("updated_at")
+  amusementparkmaps      AmusementParkMaps?
+  manager                Manager[]
+  employee               Employee[]
+  ticket                 Ticket[]
+  rides                  Rides[]
+  promotion              Promotion[]
+  purchaseticket         PurchaseTicket[]
+  purchaseticketfastpass PurchaseTicketFastpass[]
+
+  @@map("amusementpark")
+}
+
+model AmusementParkMaps {
+  id              String        @id @default(uuid()) @map("_id") @db.VarChar(36)
+  amusementparkId String        @unique @map("id_amusementpark") @db.VarChar(36)
+  companyThai     String?       @map("name_company_thai_contact") @db.VarChar(255)
+  companyEng      String?       @map("name_company_eng_contact") @db.VarChar(255)
+  address         String?       @map("address_contact") @db.VarChar(255)
+  city            String?       @map("city_contact") @db.VarChar(200)
+  zipcode         String?       @map("zipcode_contact") @db.VarChar(6)
+  country         String?       @map("country_contact") @db.VarChar(200)
+  latitude        String?
+  longitude       String?
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+  amusementpark   AmusementPark @relation(fields: [amusementparkId], references: [id]) // One-to-One RealationShip
+
+  @@map("amusementparkmaps")
+}
+
+model Rides {
+  id                      String                    @id @default(uuid()) @map("_id") @db.VarChar(36)
+  amusementparkId         String                    @map("id_amusementpark") @db.VarChar(36)
+  nameThai                String?                   @map("name_rides_thai") @db.VarChar(255)
+  nameEng                 String?                   @map("name_rides_eng") @db.VarChar(255)
+  maxseats                Int                       @default(0) @db.UnsignedSmallInt
+  usedFastpassAvailable   Int                       @default(0) @db.UnsignedTinyInt // (0) is False & (1) is True
+  isSpecial               Int                       @default(0) @db.UnsignedTinyInt // (0) is False & (1) is True
+  picture                 String?                   @map("picture_url") @db.VarChar(512)
+  createdAt               DateTime                  @default(now()) @map("created_at")
+  updatedAt               DateTime                  @updatedAt @map("updated_at")
+  employee                Employee[]
+  roundrides              RoundRides[]
+  ridesofTicket           RidesofTicket[]
+  datetimecheckinrides    DateTimeCheckInRides[]
+  purchasefastpassofrides PurchaseFastpassOfRides[]
+  amusementpark           AmusementPark             @relation(fields: [amusementparkId], references: [id])
+  purchaseticketofrides   PurchaseTicketOfRides[]
+
+  @@map("rides")
+}
+
+// table รอบเครื่องเล่น
+model RoundRides {
+  id                            String                          @id @default(uuid()) @map("_id") @db.VarChar(36)
+  ridesId                       String                          @map("id_rides") @db.VarChar(36)
+  startTime                     String?                         @map("start_time")
+  endTime                       String?                         @map("end_time")
+  updatedAt                     DateTime                        @updatedAt @map("updated_at")
+  roundridesofticketandfastpass RoundRidesOfTicketandFastpass[]
+  rides                         Rides                           @relation(fields: [ridesId], references: [id])
+
+  @@map("roundrides")
+}
+
+// [ ตั๋วประเภทนั้นๆใช้กับเครื่องเล่นได้กี่รอบ ]
+model RidesofTicket {
+  id        String   @id @default(uuid()) @map("_id") @db.VarChar(36)
+  ticketId  String   @map("id_ticket") @db.VarChar(36)
+  ridesId   String   @map("id_rides") @db.VarChar(36)
+  maxRound  Int      @default(0) @map("max_round") @db.UnsignedTinyInt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  ticket    Ticket   @relation(fields: [ticketId], references: [id])
+  rides     Rides    @relation(fields: [ridesId], references: [id])
+
+  @@map("ridesofticket")
+}
+
+// [ หนึ่งตั๋ว normal ใช้กับเครื่องเล่นแล้วกี่รอบ ]
+model PurchaseTicketOfRides {
+  id                    String               @id @default(uuid()) @map("_id") @db.VarChar(36)
+  purchasetickettypesId String               @map("id_purchasetickettypes") @db.VarChar(36)
+  ridesId               String               @map("id_rides") @db.VarChar(36)
+  usedLimit             Int                  @default(0) @map("used_limit") @db.UnsignedTinyInt
+  usedCount             Int                  @default(0) @map("used_count") @db.UnsignedTinyInt
+  createdAt             DateTime             @default(now()) @map("created_at")
+  updatedAt             DateTime             @updatedAt @map("updated_at")
+  rides                 Rides                @relation(fields: [ridesId], references: [id])
+  PurchaseTicketTypes   PurchaseTicketTypes? @relation(fields: [purchasetickettypesId], references: [id])
+
+  @@map("purchaseticketofrides")
+}
+
+// [ หนึ่งการจอง fastpass ใช้ตั๋ว SuperVisa จองกี่ตั๋ว จองเครื่องเล่นไหน สวยสนุกอะไร ]
+model PurchaseFastpassOfRides {
+  id                       String                 @id @default(uuid()) @map("_id") @db.VarChar(36)
+  ridesId                  String                 @map("id_rides") @db.VarChar(36)
+  purchaseticketfastpassId String                 @map("id_purchaseticketfastpass") @db.VarChar(36)
+  purchasetickettypesId    String                 @map("id_purchasetickettypesid") @db.VarChar(36)
+  createdAt                DateTime               @default(now()) @map("created_at")
+  updatedAt                DateTime               @updatedAt @map("updated_at")
+  rides                    Rides                  @relation(fields: [ridesId], references: [id])
+  purchaseticketfastpass   PurchaseTicketFastpass @relation(fields: [purchaseticketfastpassId], references: [id])
+  PurchaseTicketTypes      PurchaseTicketTypes?   @relation(fields: [purchasetickettypesId], references: [id])
+
+  @@map("purchasefastpassofrides")
+}
+
+// เหลือกี่ที่นั่ง สำหรับ ตั๋ว normal และ fastpass
+model RoundRidesOfTicketandFastpass {
+  id           String            @id @default(uuid()) @map("_id") @db.VarChar(36)
+  roundRidesId String?           @map("id_roundrides") @db.VarChar(36)
+  types        TypesOfRoundRides
+  usedCount    Int               @default(0) @map("used_count") @db.UnsignedTinyInt
+  createdAt    DateTime          @default(now()) @map("created_at")
+  updatedAt    DateTime          @updatedAt @map("updated_at")
+  roundrides   RoundRides?       @relation(fields: [roundRidesId], references: [id])
+
+  @@map("roundridesofticketfastpass")
+}
+
+model DateTimeCheckInRides {
+  id         String    @id @default(uuid()) @map("_id") @db.VarChar(36)
+  employeeId String?   @map("id_employee") @db.VarChar(36)
+  ridesId    String?   @map("id_rides") @db.VarChar(36)
+  timeIn     DateTime? @map("time_in") @db.DateTime()
+  employee   Employee? @relation(fields: [employeeId], references: [id])
+  rides      Rides?    @relation(fields: [ridesId], references: [id])
+
+  @@map("datetimecheckinrides")
+}
+
+// =============================== Notification ===============================
+
+model Notification {
+  id        String             @id @default(uuid()) @map("_id") @db.VarChar(36)
+  userId    String             @map("id_user") @db.VarChar(36)
+  title     String?
+  body      String?            @db.VarChar(512)
+  hasRead   Boolean            @default(false)
+  types     typesNotification?
+  createdAt DateTime           @default(now()) @map("created_at")
+  updatedAt DateTime           @updatedAt @map("updated_at")
+  user      User               @relation(fields: [userId], references: [id])
+
+  @@map("notification")
+}
+
+// =============================== Check Entrance ===============================
+
+model TicketForEntrance {
+  id                    String               @id @default(uuid()) @map("_id") @db.VarChar(36)
+  purchasetickettypesId String               @map("id_purchasetickettypes") @db.VarChar(36)
+  statusEntrance        Int                  @default(0) @map("entrance_status") @db.UnsignedTinyInt // 0 ยังไม่ได้เข้า 1 เข้าประตูแล้ว 2 ออกประตูแล้ว
+  createdAt             DateTime             @default(now()) @map("created_at")
+  updatedAt             DateTime             @updatedAt @map("updated_at")
+  purchasetickettypes   PurchaseTicketTypes? @relation(fields: [purchasetickettypesId], references: [id])
+
+  @@map("ticketforentrance")
+}
+
+// =============================== Enum ===============================
+
+enum TypesOfTicket {
+  Entrance
+  IncludeRides
+  DreamWorldVisa
+  SuperVisa
+}
+
+enum TypesOfPurchaseTicket {
+  Child
+  Adult
+}
+
+enum TypesOfRoundRides {
+  Normal
+  Fastpass
+}
+
+enum AmusementParkStatus {
+  Active
+  Inactive
+}
+
+enum PurchaseTicketStatus {
+  Pending
+  Unused
+  Completed
+}
+
+enum Gender {
+  Male
+  Female
+}
+
+enum typesNotification {
+  Promotion
+  Ticket
+  Fastpass
+  Payment
+  Queue
+  System
+}
+
+enum TypesRoleEmployee {
+  EntranceEmployee
+  RidesEmployee
+}
