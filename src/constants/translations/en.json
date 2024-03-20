@@ -1,0 +1,35 @@
+{
+  "common": {
+    "search": "Search",
+    "name": "Name",
+    "terms": "Terms and Conditions",
+    "signin": "Signin",
+    "goBack": "Go Back"
+  },
+  "app": {
+    "name": "QueueTix",
+    "fullname": "QueueTix Full",
+    "link": ""
+  },
+  "screens": {
+    "home": "Home",
+    "tickets": "Tickets",
+    "fastpass": "Fastpass",
+    "room": "Room",
+    "profile": "Profile"
+  },
+  "navigation": {
+    "home": "Home",
+    "tickets": "Tickets",
+    "fastpass": "Fastpass",
+    "room": "Room",
+    "profile": "Profile"
+  },
+  "home": {
+    "title": "QueueTix",
+    "trending": "Promotion"
+  },
+  "signup": {
+    "title": "สมัครสมาชิก"
+  }
+}

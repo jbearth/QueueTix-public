@@ -1,0 +1,54 @@
+{
+  "common": {
+    "search": "Search",
+    "name": "ชื่อผู้ใช้",
+    "namePlaceholder": "ใส่ชื่อของคุณ",
+    "agree": "ฉันเห็นด้วยกับ ",
+    "terms": "Terms and Conditions",
+    "signup": "สมัครสมาชิก",
+    "goBack": "ย้อนกลับ"
+  },
+  "app": {
+    "name": "QueueTix",
+    "fullname": "QueueTix Full",
+    "link": ""
+  },
+  "darkMode": "Dark Mode",
+  "screens": {
+    "home": "หน้าแรก",
+    "articles": "จองตั๋ว",
+    "chat": "แชท",
+    "profile": "โปรไฟล์",
+    "settings": "Settings",
+    "register": "Register",
+    "login": "Login",
+    "promotion": "โปรโมชั่น"
+  },
+  "navigation": {
+    "home": "หน้าแรก",
+    "ticket": "จองตั๋ว",
+    "profile": "โปรไฟล์",
+    "settings": "ตั้งค่า",
+    "promotion": "โปรโมชั่น"
+  },
+  "menu": {
+    "started": "ออกจากระบบ",
+    "documentation": ""
+  },
+  "home": {
+    "title": "QueueTix",
+    "following": "ข่าวสาร",
+    "trending": "โปรโมชั่น"
+  },
+  "signup": {
+    "title": "สมัครสมาชิก",
+    "alreadyaccount": "มีบัญชีอยู่แล้ว?"
+  },
+  "signin": {
+    "title": "เข้าสู่ระบบ",
+    "noaccount": "ยังไม่มีมีบัญชี?"
+  },
+  "profile": {
+    "title": "Profile"
+  }
+}
